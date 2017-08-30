@@ -54,11 +54,12 @@ public:
 	idDemoFile();
 	~idDemoFile();
 	
-	const char* 	GetName()
+	virtual const char* 	GetName() const override
 	{
 		return ( f ? f->GetName() : "" );
 	}
-	const char* 	GetFullPath()
+	
+    virtual const char* 	GetFullPath() const override
 	{
 		return ( f ? f->GetFullPath() : "" );
 	}
@@ -75,8 +76,8 @@ public:
 	void			ReadDict( idDict& dict );
 	void			WriteDict( const idDict& dict );
 	
-	int				Read( void* buffer, int len );
-	int				Write( const void* buffer, int len );
+	int				Read( void* buffer, int len ) override;
+	int				Write( const void* buffer, int len ) override;
 	
 private:
 	static idCompressor* AllocCompressor( int type );

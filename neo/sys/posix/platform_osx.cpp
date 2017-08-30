@@ -26,9 +26,7 @@ If you have questions concerning this license or the applicable additional terms
 
 ===========================================================================
 */
-//#include "../../idlib/precompiled.h"
-#include "../posix/posix_public.h"
-//#include "../sys_local.h"
+#include "../../idlib/precompiled.h"
 
 #include <pthread.h>
 #include <errno.h>
@@ -42,6 +40,8 @@ If you have questions concerning this license or the applicable additional terms
 #include <mach/clock_types.h>
 #include <mach/mach.h>
 #include <mach-o/dyld.h>
+
+#include "../posix/posix_public.h"
 
 // DG: needed for Sys_ReLaunch()
 #include <dirent.h>
@@ -389,52 +389,7 @@ void Sys_ReLaunch()
 	}
 	// DG end
 }
-
-// OS X doesn't have clock_gettime()
-int clock_gettime( clk_id_t clock, struct timespec* tp )
-{
-	switch( clock )
-	{
-		case CLOCK_MONOTONIC_RAW:
-		case CLOCK_MONOTONIC:
-		{
-			clock_serv_t clock_ref;
-			mach_timespec_t tm;
-			host_name_port_t self = mach_host_self();
-			memset( &tm, 0, sizeof( tm ) );
-			if( KERN_SUCCESS != host_get_clock_service( self, SYSTEM_CLOCK, &clock_ref ) )
-			{
-				mach_port_deallocate( mach_task_self(), self );
-				return -1;
-			}
-			if( KERN_SUCCESS != clock_get_time( clock_ref, &tm ) )
-			{
-				mach_port_deallocate( mach_task_self(), self );
-				return -1;
-			}
-			mach_port_deallocate( mach_task_self(), self );
-			mach_port_deallocate( mach_task_self(), clock_ref );
-			tp->tv_sec = tm.tv_sec;
-			tp->tv_nsec = tm.tv_nsec;
-			break;
-		}
-		
-		case CLOCK_REALTIME:
-		default:
-		{
-			struct timeval now;
-			if( KERN_SUCCESS != gettimeofday( &now, NULL ) )
-			{
-				return -1;
-			}
-			tp->tv_sec  = now.tv_sec;
-			tp->tv_nsec = now.tv_usec * 1000;
-			break;
-		}
-	}
-	return 0;
-}
-
+ 
 /*
 ===============
 main
